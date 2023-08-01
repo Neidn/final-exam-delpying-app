@@ -2,7 +2,6 @@ from django.contrib import admin
 from .models import *
 
 
-# <HINT> Register QuestionInline and ChoiceInline classes here
 class QuestionInline(admin.StackedInline):
     model = Question
     extra = 5
@@ -30,7 +29,6 @@ class LessonAdmin(admin.ModelAdmin):
     list_display = ['title']
 
 
-# <HINT> Register Question and Choice models here
 class QuestionAdmin(admin.ModelAdmin):
     list_display = ['question_text']
 

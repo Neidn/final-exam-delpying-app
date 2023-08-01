@@ -132,34 +132,43 @@ def submit(request, course_id):
     return HttpResponseRedirect(reverse(viewname='onlinecourse:show_exam_result', args=(course.id, submission.id,)))
 
 
-def extract_answers(request):
-    submitted_answers = []
-
-    for key in request.POST:
-        if key.startswith('choice'):
-            value = request.POST[key]
-            choice_id = int(value)
-            submitted_answers.append(choice_id)
-    return submitted_answers
+# def extract_answers(request):
+#     submitted_answers = []
+#
+#     for key, value in request.POST.items():
+#         if key.startswith('choice'):
+#             choice_id = int(value)
+#             submitted_answers.append(choice_id)
+#
+#     return submitted_answers
 
 
 def show_exam_result(request, course_id, submission_id):
     course = get_object_or_404(Course, pk=course_id)
     submission = Submission.objects.get(pk=submission_id)
-    selected_choice_ids = extract_answers(request)
+    choice_ids = submission.choices.values_list('pk', flat=True)
 
     total_score = 0
+    selected_choice_ids = []
 
-    for choice_id in selected_choice_ids:
+    for choice_id in choice_ids:
         choice = Choice.objects.get(pk=choice_id)
+        selected_choice_ids.append(choice)
+
         if choice.is_correct:
             total_score += 1
+
+    grade = total_score / len(choice_ids) * 100 if len(choice_ids) > 0 else 0
+
+    # Convert to int
+    grade = int(grade)
 
     context = {
         'course': course,
         'submission': submission,
         'selected_choice_ids': selected_choice_ids,
         'total_score': total_score,
+        'grade': grade,
     }
 
     return render(request, 'onlinecourse/exam_result_bootstrap.html', context)
